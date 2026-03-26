@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acme Corp — Atomic Segment Chain</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --color-border-tertiary: #e5e5e5;
+    --color-border-secondary: #ccc;
+    --color-background-primary: #fff;
+    --color-background-secondary: #f5f5f3;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-text-tertiary: #999;
+  }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 24px; background: #fff; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+  .chain-step{padding:16px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);opacity:.35;transform:scale(.98);transition:opacity .4s,transform .4s,border-color .3s}
+  .chain-step.active{opacity:1;transform:scale(1)}
+  .chain-step.active.step-signal{border-color:#EF9F27}
+  .chain-step.active.step-shift{border-color:#5DCAA5}
+  .chain-step.active.step-canon{border-color:#AFA9EC}
+  .chain-step.active.step-play{border-color:#E24B4A}
+  .chain-connector{display:flex;align-items:center;justify-content:center;padding:4px 0;color:var(--color-text-tertiary);font-size:18px;opacity:.3;transition:opacity .4s}
+  .chain-connector.active{opacity:1}
+  .pill-before{font-size:12px;padding:3px 10px;border-radius:12px;background:#EAF3DE;color:#27500A;border:0.5px solid #97C459;text-decoration:line-through;opacity:.6}
+  .pill-after{font-size:12px;padding:3px 10px;border-radius:12px;background:#FCEBEB;color:#791F1F;border:0.5px solid #F09595}
+  .pill-atom{font-size:12px;padding:3px 10px;border-radius:12px;background:#E1F5EE;color:#085041;border:0.5px solid #5DCAA5}
+  .pill-canon{font-size:12px;padding:3px 10px;border-radius:12px;background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC}
+  .auto-btn{font-size:13px;cursor:pointer;padding:4px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);transition:background .2s}
+  .auto-btn:hover{background:var(--color-background-secondary)}
+  .auto-btn.running{background:var(--color-background-secondary);color:var(--color-text-primary)}
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 16px">
+<div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">Acme Corp — 6 months active</div>
+<button class="auto-btn" id="play-btn" onclick="playSequence()">Play sequence</button>
+<button class="auto-btn" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="chain-step step-signal" id="step-1">
+<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">1. SIGNAL DETECTED</div>
+<div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px">Weekly active users drop from 12 to 3</div>
+<div style="font-size:13px;color:var(--color-text-secondary)">Usage monitoring detects a significant decline in product engagement.</div>
+</div>
+
+<div class="chain-connector" id="conn-1">|</div>
+
+<div class="chain-step step-shift" id="step-2">
+<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">2. DIMENSION VALUE SHIFTS</div>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<span style="font-size:13px;color:var(--color-text-secondary)">product-health:</span>
+<span class="pill-before">healthy</span>
+<span style="font-size:13px;color:var(--color-text-tertiary)">-></span>
+<span class="pill-after">at-risk</span>
+</div>
+</div>
+
+<div class="chain-connector" id="conn-2">|</div>
+
+<div class="chain-step step-canon" id="step-3">
+<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">3. CANONICAL SEGMENT CHANGES</div>
+<div style="font-size:13px;color:var(--color-text-secondary);margin:0 0 8px">Acme now matches a new canonical segment:</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<span class="pill-canon">At-risk mid-market active customer</span>
+</div>
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 0">
+<span class="pill-atom">stage:active</span>
+<span style="font-size:12px;color:var(--color-text-tertiary)">+</span>
+<span class="pill-atom">size:mid-market</span>
+<span style="font-size:12px;color:var(--color-text-tertiary)">+</span>
+<span class="pill-after">product-health:at-risk</span>
+</div>
+</div>
+
+<div class="chain-connector" id="conn-3">|</div>
+
+<div class="chain-step step-play" id="step-4">
+<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">4. PLAY TRIGGERS</div>
+<div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px">Retention play fires</div>
+<div style="font-size:13px;color:var(--color-text-secondary)">CS gets an alert. CSM reaches out to re-engage the account before it's too late.</div>
+</div>
+
+<div style="margin:20px 0 0;padding:12px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-size:13px;color:var(--color-text-secondary);line-height:1.6" id="summary-box">
+The whole system in four steps: a record has a current state and dimension values. A signal changes a dimension value. That changes which canonical segments the record matches. Segment membership triggers a play.
+</div>
+
+<script>
+const stepEls = [
+  document.getElementById('step-1'),
+  document.getElementById('step-2'),
+  document.getElementById('step-3'),
+  document.getElementById('step-4')
+];
+const connEls = [
+  document.getElementById('conn-1'),
+  document.getElementById('conn-2'),
+  document.getElementById('conn-3')
+];
+
+let activeCount = 0;
+let playing = false;
+
+function activateStep(n) {
+  if (n < stepEls.length) {
+    stepEls[n].classList.add('active');
+  }
+  if (n > 0 && n - 1 < connEls.length) {
+    connEls[n - 1].classList.add('active');
+  }
+  activeCount = n + 1;
+}
+
+function resetAll() {
+  playing = false;
+  document.getElementById('play-btn').classList.remove('running');
+  document.getElementById('play-btn').textContent = 'Play sequence';
+  activeCount = 0;
+  stepEls.forEach(el => el.classList.remove('active'));
+  connEls.forEach(el => el.classList.remove('active'));
+}
+
+function playSequence() {
+  if (playing) return;
+  resetAll();
+  playing = true;
+  const btn = document.getElementById('play-btn');
+  btn.classList.add('running');
+  btn.textContent = 'Playing...';
+
+  for (let i = 0; i < 4; i++) {
+    setTimeout(() => {
+      if (!playing) return;
+      activateStep(i);
+      if (i === 3) {
+        setTimeout(() => {
+          playing = false;
+          btn.classList.remove('running');
+          btn.textContent = 'Play sequence';
+        }, 400);
+      }
+    }, i * 800);
+  }
+}
+</script>
+</body>
+</html>
