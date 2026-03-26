@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acme Corp — Atomic Segment Walkthrough</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 24px; background: #fff; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+  .step-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; transition: background .2s; }
+  .step-dot.active { background: #1a1a1a; border-color: #1a1a1a; }
+  .step-dot.done { background: #ccc; }
+  .dim-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; opacity: 0; transform: translateY(4px); transition: opacity .3s, transform .3s; }
+  .dim-row.visible { opacity: 1; transform: translateY(0); }
+  .dim-label { font-size: 13px; color: #666; min-width: 100px; }
+  .pill-simple { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; white-space: nowrap; }
+  .pill-derived { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #FAEEDA; color: #633806; border: 1px solid #FAC775; white-space: nowrap; }
+  .type-tag { font-size: 10px; padding: 1px 6px; border-radius: 8px; margin-left: 4px; white-space: nowrap; }
+  .type-simple { background: #E1F5EE; color: #0F6E56; }
+  .type-derived { background: #FAEEDA; color: #854F0B; }
+  .canon-box { padding: 10px 14px; border-radius: 8px; border: 1px solid #e5e5e5; background: #f9f9f7; margin-top: 8px; opacity: 0; transform: translateY(4px); transition: opacity .3s, transform .3s; }
+  .canon-box.visible { opacity: 1; transform: translateY(0); }
+  .stage-pill { font-size: 13px; font-weight: 500; padding: 4px 14px; border-radius: 14px; display: inline-block; }
+  .narration-box { padding: 12px 14px; border-radius: 8px; background: #E6F1FB; color: #0C447C; font-size: 14px; line-height: 1.6; margin: 0 0 16px; min-height: 48px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; vertical-align: middle; }
+  button { font-family: inherit; font-size: 13px; cursor: pointer; padding: 6px 16px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #666; transition: background .2s; }
+  button:hover { background: #f5f5f3; }
+  button:disabled { opacity: .4; cursor: default; }
+  button:disabled:hover { background: #fff; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:8px;margin:0 0 12px">
+  <div style="font-size:15px;font-weight:500">Acme Corp</div>
+  <div style="font-size:13px;color:#666">— 200-person fintech company</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 12px">
+  <button onclick="goStep(-1)" id="btn-prev" disabled>Previous</button>
+  <div style="display:flex;gap:6px;align-items:center" id="dots"></div>
+  <button onclick="goStep(1)" id="btn-next">Next</button>
+  <span style="font-size:13px;color:#999;margin-left:8px" id="step-label"></span>
+</div>
+
+<div class="narration-box" id="narration"></div>
+
+<div style="display:flex;gap:16px;align-items:center;margin:0 0 12px;font-size:12px;color:#888">
+  <span><span class="legend-dot" style="background:#5DCAA5"></span> Simple — field exists in tools</span>
+  <span><span class="legend-dot" style="background:#FAC775"></span> Derived — requires logic to compute</span>
+</div>
+
+<div style="margin:0 0 16px">
+  <div style="font-size:13px;color:#888;margin:0 0 6px">Journey state</div>
+  <div id="stage-display"></div>
+</div>
+
+<div style="margin:0 0 16px">
+  <div style="font-size:13px;color:#888;margin:0 0 6px">Dimensions + atomic segments</div>
+  <div id="dims-container"></div>
+</div>
+
+<div id="canon-container"></div>
+
+<script>
+const S = 'simple';
+const D = 'derived';
+
+const steps = [
+  {
+    stage: { label: 'Prospect', bg: '#F1EFE8', color: '#444' },
+    dims: [],
+    canons: [],
+    narration: "Acme Corp matches Beacon's ICP \u2014 a 200-person fintech company. They're in the Prospect stage: no interaction yet."
+  },
+  {
+    stage: { label: 'Lead', bg: '#E6F1FB', color: '#0C447C' },
+    dims: [
+      { label: 'Company size', value: 'size:mid-market', type: S, note: 'Enrichment field' },
+      { label: 'Industry', value: 'industry:fintech', type: S, note: 'Enrichment field' }
+    ],
+    canons: [],
+    narration: "A VP of Product signs up for a free workspace and requests a demo. Acme moves to Lead. Two simple dimensions enrich automatically \u2014 these are standard fields that exist in every tool."
+  },
+  {
+    stage: { label: 'Lead', bg: '#E6F1FB', color: '#0C447C' },
+    dims: [
+      { label: 'Company size', value: 'size:mid-market', type: S, note: 'Enrichment field' },
+      { label: 'Industry', value: 'industry:fintech', type: S, note: 'Enrichment field' },
+      { label: 'GTM motion', value: 'motion:sales-assist', type: D, note: 'Computed from behavior: signed up self-serve, then requested demo' },
+      { label: 'Geography', value: 'geo:bay-area', type: D, note: 'City checked against dozens of Bay Area cities across multiple counties' },
+      { label: 'Customer type', value: 'type:trial', type: D, note: 'Computed from workspace status in the product database' }
+    ],
+    canons: [],
+    narration: "Now derived atomic segments layer on. These don't exist as simple fields \u2014 each one requires logic. GTM motion is inferred from behavior. Bay Area geography requires matching a city to a list of cities. Customer type is computed from product data. All defined once in the warehouse, synced everywhere."
+  },
+  {
+    stage: { label: 'Lead', bg: '#E6F1FB', color: '#0C447C' },
+    dims: [
+      { label: 'Company size', value: 'size:mid-market', type: S, note: 'Enrichment field' },
+      { label: 'Industry', value: 'industry:fintech', type: S, note: 'Enrichment field' },
+      { label: 'GTM motion', value: 'motion:sales-assist', type: D, note: 'Computed from behavior' },
+      { label: 'Geography', value: 'geo:bay-area', type: D, note: 'Computed from city list' },
+      { label: 'Customer type', value: 'type:trial', type: D, note: 'Computed from product data' }
+    ],
+    canons: [
+      { label: 'Lead mid-market', formula: 'state:lead + size:mid-market' },
+      { label: 'Lead fintech', formula: 'state:lead + industry:fintech' }
+    ],
+    narration: "Simple and derived atomic segments compose equally into canonical segments. \"Lead mid-market\" uses a simple segment, \"Lead fintech\" uses another. Teams don't need to know whether a segment is simple or derived \u2014 they just use the canonical name."
+  },
+  {
+    stage: { label: 'Opportunity', bg: '#FAEEDA', color: '#633806' },
+    dims: [
+      { label: 'Company size', value: 'size:mid-market', type: S, note: 'Enrichment field' },
+      { label: 'Industry', value: 'industry:fintech', type: S, note: 'Enrichment field' },
+      { label: 'GTM motion', value: 'motion:sales-assist', type: D, note: 'Computed from behavior' },
+      { label: 'Geography', value: 'geo:bay-area', type: D, note: 'Computed from city list' },
+      { label: 'Customer type', value: 'type:trial', type: D, note: 'Computed from product data' }
+    ],
+    canons: [
+      { label: 'Sales-assist mid-market opportunity', formula: 'state:opportunity + motion:sales-assist + size:mid-market' }
+    ],
+    narration: "The AE qualifies Acme. They move to Opportunity. The canonical segment updates automatically \u2014 mixing a derived segment (motion:sales-assist) with a simple one (size:mid-market). Same building blocks, new combination."
+  },
+  {
+    stage: { label: 'Active', bg: '#EAF3DE', color: '#27500A' },
+    dims: [
+      { label: 'Company size', value: 'size:mid-market', type: S, note: 'Enrichment field' },
+      { label: 'Industry', value: 'industry:fintech', type: S, note: 'Enrichment field' },
+      { label: 'GTM motion', value: 'motion:sales-assist', type: D, note: 'Computed from behavior' },
+      { label: 'Geography', value: 'geo:bay-area', type: D, note: 'Computed from city list' },
+      { label: 'Customer type', value: 'type:paid', type: D, note: 'Updated: workspace now has active subscription' },
+      { label: 'Plan', value: 'plan:team', type: S, note: 'Plan field from billing' },
+      { label: 'Paid status', value: 'paid-status:active', type: S, note: 'Billing status field' }
+    ],
+    canons: [
+      { label: 'Active mid-market paid customer', formula: 'state:active + size:mid-market + type:paid + plan:team' }
+    ],
+    narration: "Acme signs a Team plan. New post-sale dimensions activate \u2014 plan and paid-status are simple fields from billing. Customer type updates from trial to paid (still derived, but the logic re-evaluates). The canonical segment reflects their new reality."
+  }
+];
+
+let currentStep = 0;
+const dotsEl = document.getElementById('dots');
+const stageEl = document.getElementById('stage-display');
+const dimsEl = document.getElementById('dims-container');
+const canonEl = document.getElementById('canon-container');
+const narrEl = document.getElementById('narration');
+const labelEl = document.getElementById('step-label');
+
+for (let i = 0; i < steps.length; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'step-dot';
+  dot.onclick = () => { currentStep = i; render(); };
+  dotsEl.appendChild(dot);
+}
+
+function render() {
+  const s = steps[currentStep];
+  document.getElementById('btn-prev').disabled = currentStep === 0;
+  document.getElementById('btn-next').disabled = currentStep === steps.length - 1;
+  labelEl.textContent = 'Step ' + (currentStep + 1) + ' of ' + steps.length;
+  dotsEl.querySelectorAll('.step-dot').forEach((d, i) => {
+    d.className = 'step-dot' + (i === currentStep ? ' active' : i < currentStep ? ' done' : '');
+  });
+  narrEl.textContent = s.narration;
+  stageEl.innerHTML = '<span class="stage-pill" style="background:' + s.stage.bg + ';color:' + s.stage.color + '">' + s.stage.label + '</span>';
+  dimsEl.innerHTML = '';
+  s.dims.forEach((d, i) => {
+    const row = document.createElement('div');
+    row.className = 'dim-row';
+    const pillClass = d.type === S ? 'pill-simple' : 'pill-derived';
+    const tagClass = d.type === S ? 'type-simple' : 'type-derived';
+    const tagLabel = d.type === S ? 'simple' : 'derived';
+    row.innerHTML = '<span class="dim-label">' + d.label + '</span>' +
+      '<span class="' + pillClass + '">' + d.value + '</span>' +
+      '<span class="type-tag ' + tagClass + '">' + tagLabel + '</span>' +
+      '<span style="font-size:11px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + d.note + '</span>';
+    dimsEl.appendChild(row);
+    requestAnimationFrame(() => { requestAnimationFrame(() => { row.classList.add('visible'); }); });
+  });
+  if (s.dims.length === 0) {
+    dimsEl.innerHTML = '<div style="font-size:13px;color:#bbb;padding:6px 0">No dimensions yet \u2014 Acme hasn\'t interacted.</div>';
+  }
+  canonEl.innerHTML = '';
+  if (s.canons.length > 0) {
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:13px;color:#888;margin:12px 0 4px';
+    hdr.textContent = 'Canonical segments';
+    canonEl.appendChild(hdr);
+    s.canons.forEach(c => {
+      const box = document.createElement('div');
+      box.className = 'canon-box';
+      box.innerHTML = '<div style="font-size:14px;font-weight:500;color:#3C3489">' + c.label + '</div><div style="font-size:12px;color:#aaa;margin-top:2px">' + c.formula + '</div>';
+      canonEl.appendChild(box);
+      requestAnimationFrame(() => { requestAnimationFrame(() => { box.classList.add('visible'); }); });
+    });
+  }
+}
+
+function goStep(dir) {
+  currentStep = Math.max(0, Math.min(steps.length - 1, currentStep + dir));
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
