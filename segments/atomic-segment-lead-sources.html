@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Sources — Journey Spine</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --color-border-tertiary: #e5e5e5;
+    --color-border-secondary: #ccc;
+    --color-background-primary: #fff;
+    --color-background-secondary: #f5f5f3;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-text-tertiary: #999;
+  }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 24px; background: #fff; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+  .source-card{padding:12px 16px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);cursor:pointer;transition:border-color .2s,opacity .2s;user-select:none}
+  .source-card:hover{border-color:var(--color-border-secondary)}
+  .source-card.active{border-width:2px}
+  .source-card.dimmed{opacity:.35}
+  .stage-box{transition:opacity .2s}
+  .stage-box.dimmed{opacity:.25}
+  .conn-path{transition:opacity .3s,stroke-width .3s}
+  .conn-path.dimmed{opacity:.08}
+  .conn-path.highlighted{stroke-width:2.5px;opacity:1}
+  .info-panel{font-size:13px;color:var(--color-text-secondary);min-height:48px;padding:12px 0;line-height:1.6}
+  text.th { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 12px; }
+  line.arr { stroke: #ccc; stroke-width: 1; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;gap:12px;margin:0 0 20px">
+<div class="source-card active" id="src-signups" onclick="highlight('signups')" style="flex:1;border-color:#0F6E56;border-width:2px">
+<div style="font-size:13px;font-weight:500;color:#085041">Self-serve</div>
+<div style="font-size:12px;color:#0F6E56;margin-top:2px">Product-led sign-ups</div>
+</div>
+<div class="source-card dimmed" id="src-handraisers" onclick="highlight('handraisers')" style="flex:1;border-color:#534AB7">
+<div style="font-size:13px;font-weight:500;color:#3C3489">Demo requests</div>
+<div style="font-size:12px;color:#534AB7;margin-top:2px">Inbound hand raisers</div>
+</div>
+<div class="source-card dimmed" id="src-outbound" onclick="highlight('outbound')" style="flex:1;border-color:#993C1D">
+<div style="font-size:13px;font-weight:500;color:#712B13">Outbound</div>
+<div style="font-size:12px;color:#993C1D;margin-top:2px">Sales-sourced, ABM</div>
+</div>
+</div>
+
+<svg width="100%" viewBox="0 0 680 110" id="spine-svg">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+
+<path class="conn-path highlighted" id="conn-signups" d="M130 0 L130 8 Q130 24 150 30 L158 34" fill="none" stroke="#1D9E75" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<path class="conn-path dimmed" id="conn-handraisers" d="M340 0 L340 8 Q340 24 280 30 L240 38" fill="none" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+<path class="conn-path dimmed" id="conn-outbound" d="M550 0 L550 8 Q550 24 440 30 L72 38" fill="none" stroke="#D85A30" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-prospect" data-sources="outbound">
+<rect x="8" y="40" width="76" height="44" rx="6" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text class="th" x="46" y="66" text-anchor="middle" fill="#0C447C">Prospect</text>
+</g>
+<line x1="84" y1="62" x2="96" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-lead" data-sources="signups,handraisers,outbound">
+<rect x="98" y="40" width="52" height="44" rx="6" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text class="th" x="124" y="66" text-anchor="middle" fill="#0C447C">Lead</text>
+</g>
+<line x1="150" y1="62" x2="162" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-engaged" data-sources="signups,handraisers,outbound">
+<rect x="164" y="40" width="76" height="44" rx="6" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text class="th" x="202" y="66" text-anchor="middle" fill="#0C447C">Engaged</text>
+</g>
+<line x1="240" y1="62" x2="252" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-opportunity" data-sources="signups,handraisers,outbound">
+<rect x="254" y="40" width="92" height="44" rx="6" fill="#E6F1FB" stroke="#85B7EB" stroke-width="0.5"/>
+<text class="th" x="300" y="66" text-anchor="middle" fill="#0C447C">Opportunity</text>
+</g>
+<line x1="346" y1="62" x2="358" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-commit" data-sources="signups,handraisers,outbound">
+<rect x="360" y="36" width="68" height="52" rx="6" fill="#EEEDFE" stroke="#534AB7" stroke-width="1.5"/>
+<text class="th" x="394" y="66" text-anchor="middle" fill="#3C3489">Commit</text>
+</g>
+<line x1="428" y1="62" x2="440" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-onboarding" data-sources="signups,handraisers,outbound">
+<rect x="442" y="40" width="88" height="44" rx="6" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text class="th" x="486" y="66" text-anchor="middle" fill="#27500A">Onboarding</text>
+</g>
+<line x1="530" y1="62" x2="542" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-active" data-sources="signups,handraisers,outbound">
+<rect x="544" y="40" width="56" height="44" rx="6" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text class="th" x="572" y="66" text-anchor="middle" fill="#27500A">Active</text>
+</g>
+<line x1="600" y1="62" x2="612" y2="62" class="arr" marker-end="url(#arrow)"/>
+
+<g class="stage-box" id="stage-churned" data-sources="signups,handraisers,outbound">
+<rect x="614" y="40" width="60" height="44" rx="6" fill="#EAF3DE" stroke="#97C459" stroke-width="0.5"/>
+<text class="th" x="644" y="66" text-anchor="middle" fill="#27500A">Churned</text>
+</g>
+
+</svg>
+
+<div class="info-panel" id="info-panel">Self-serve sign-ups enter at the Lead stage. They've already expressed interest by creating an account. From there they move through the journey self-serve — or get flagged for sales-assist if they match ICP signals.</div>
+
+<script>
+var sources = {
+  signups: {
+    borderColor: '#0F6E56',
+    info: "Self-serve sign-ups enter at the Lead stage. They've already expressed interest by creating an account. From there they move through the journey self-serve \u2014 or get flagged for sales-assist if they match ICP signals."
+  },
+  handraisers: {
+    borderColor: '#534AB7',
+    info: "Demo requests enter at the Lead stage with high intent. They already know what they want. Sales engages immediately and guides them through the rest of the journey."
+  },
+  outbound: {
+    borderColor: '#993C1D',
+    info: "Outbound-sourced accounts enter at the Prospect stage \u2014 they match ICP but haven't interacted yet. Sales or marketing needs to create awareness and generate interest before they become Leads."
+  }
+};
+
+var activeSource = 'signups';
+
+function highlight(src) {
+  if (activeSource === src) return;
+  activeSource = src;
+  Object.keys(sources).forEach(function(s) {
+    var card = document.getElementById('src-' + s);
+    var conn = document.getElementById('conn-' + s);
+    if (s === src) {
+      card.classList.add('active'); card.classList.remove('dimmed');
+      card.style.borderColor = sources[s].borderColor;
+      card.style.borderWidth = '2px';
+      conn.classList.add('highlighted'); conn.classList.remove('dimmed');
+    } else {
+      card.classList.remove('active'); card.classList.add('dimmed');
+      card.style.borderWidth = '0.5px';
+      conn.classList.remove('highlighted'); conn.classList.add('dimmed');
+    }
+  });
+  document.querySelectorAll('.stage-box').forEach(function(el) {
+    var elSources = (el.dataset.sources || '').split(',');
+    if (elSources.indexOf(src) !== -1) { el.classList.remove('dimmed'); }
+    else { el.classList.add('dimmed'); }
+  });
+  document.getElementById('info-panel').textContent = sources[src].info;
+}
+</script>
+</body>
+</html>
