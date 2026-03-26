@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acme Corp — Same Signal, Different Stage</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --border-radius-lg: 12px;
+    --border-radius-md: 8px;
+    --color-border-tertiary: #e5e5e5;
+    --color-border-secondary: #ccc;
+    --color-background-primary: #fff;
+    --color-background-secondary: #f5f5f3;
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-text-tertiary: #999;
+  }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 24px; background: #fff; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+  .scenario-tab{padding:8px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;font-size:13px;color:var(--color-text-secondary);transition:all .2s;user-select:none;background:transparent}
+  .scenario-tab:hover{background:var(--color-background-secondary)}
+  .scenario-tab.active-prospect{background:#FAEEDA;color:#633806;border-color:#FAC775}
+  .scenario-tab.active-customer{background:#EAF3DE;color:#27500A;border-color:#97C459}
+  .sig-box{padding:14px 16px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);margin:0 0 12px}
+  .outcome-card{padding:14px 16px;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+  .outcome-card.visible{opacity:1;transform:translateY(0)}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;padding:6px 0;font-size:16px;color:var(--color-text-tertiary)}
+  .tag-stage{font-size:12px;padding:3px 10px;border-radius:12px;display:inline-block}
+  .tag-canon{font-size:12px;padding:3px 10px;border-radius:12px;background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC;display:inline-block}
+  .tag-play{font-size:12px;padding:3px 10px;border-radius:12px;display:inline-block}
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:8px;margin:0 0 16px">
+<div style="font-size:13px;color:var(--color-text-secondary)">Acme Corp hires a VP of Data & Analytics. What happens?</div>
+</div>
+
+<div style="display:flex;gap:8px;margin:0 0 16px">
+<div class="scenario-tab active-prospect" id="tab-prospect" onclick="showScenario('prospect')">If they're a Prospect</div>
+<div class="scenario-tab" id="tab-customer" onclick="showScenario('customer')">If they're an Active customer</div>
+</div>
+
+<div class="sig-box">
+<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 4px">SIGNAL (IDENTICAL)</div>
+<div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">VP of Data & Analytics hired at Acme Corp</div>
+<div style="font-size:13px;color:var(--color-text-secondary);margin:4px 0 0">Detected via enrichment / LinkedIn monitoring</div>
+</div>
+
+<div class="flow-arrow">|</div>
+
+<div id="scenario-content"></div>
+
+<div style="margin:16px 0 0;padding:12px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-size:13px;color:var(--color-text-secondary);line-height:1.6">
+Same signal. Different journey stage. Different canonical segment. Different play. This is why journey state is its own layer — it scopes how every other dimension gets interpreted.
+</div>
+
+<script>
+const scenarios = {
+  prospect: {
+    stage: { label: 'Prospect', bg: '#FAEEDA', color: '#633806', border: '#FAC775' },
+    interpretation: 'They\'re building the team that buys products like yours. This is a buying signal — get in front of them before they evaluate competitors.',
+    canon: { label: 'High-priority outbound target', formula: 'state:prospect + size:mid-market + industry:fintech + signal:vp-data-hired' },
+    play: { label: 'Outbound prioritization', detail: 'Sales moves them to the top of the queue. Marketing adds them to a targeted ABM campaign. SDR sequences a personalized outreach referencing the new hire.', bg: '#FAEEDA', color: '#633806', border: '#FAC775' }
+  },
+  customer: {
+    stage: { label: 'Active', bg: '#EAF3DE', color: '#27500A', border: '#97C459' },
+    interpretation: 'A new VP will evaluate the entire tooling stack and may want to bring in their own preferred tools. This is a risk signal — protect the account.',
+    canon: { label: 'At-risk active (leadership change)', formula: 'state:active + size:mid-market + type:paid + signal:vp-data-hired' },
+    play: { label: 'Account protection', detail: 'CS engages immediately. CSM schedules an intro meeting with the new VP. Prepare an executive business review showing impact delivered. Build the relationship before they start making changes.', bg: '#FCEBEB', color: '#791F1F', border: '#F09595' }
+  }
+};
+
+let currentScenario = 'prospect';
+
+function showScenario(key) {
+  currentScenario = key;
+  const s = scenarios[key];
+
+  document.getElementById('tab-prospect').className = 'scenario-tab' + (key === 'prospect' ? ' active-prospect' : '');
+  document.getElementById('tab-customer').className = 'scenario-tab' + (key === 'customer' ? ' active-customer' : '');
+
+  const container = document.getElementById('scenario-content');
+  container.innerHTML = '';
+
+  const stageCard = document.createElement('div');
+  stageCard.className = 'outcome-card';
+  stageCard.innerHTML = '<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">JOURNEY STATE</div>' +
+    '<span class="tag-stage" style="background:' + s.stage.bg + ';color:' + s.stage.color + ';border:0.5px solid ' + s.stage.border + '">' + s.stage.label + '</span>' +
+    '<div style="font-size:13px;color:var(--color-text-secondary);margin:8px 0 0">' + s.interpretation + '</div>';
+  container.appendChild(stageCard);
+
+  const arrow1 = document.createElement('div');
+  arrow1.className = 'flow-arrow';
+  arrow1.textContent = '|';
+  container.appendChild(arrow1);
+
+  const canonCard = document.createElement('div');
+  canonCard.className = 'outcome-card';
+  canonCard.innerHTML = '<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">CANONICAL SEGMENT</div>' +
+    '<span class="tag-canon">' + s.canon.label + '</span>' +
+    '<div style="font-size:12px;color:var(--color-text-tertiary);margin:6px 0 0">' + s.canon.formula + '</div>';
+  container.appendChild(canonCard);
+
+  const arrow2 = document.createElement('div');
+  arrow2.className = 'flow-arrow';
+  arrow2.textContent = '|';
+  container.appendChild(arrow2);
+
+  const playCard = document.createElement('div');
+  playCard.className = 'outcome-card';
+  playCard.innerHTML = '<div style="font-size:11px;letter-spacing:0.5px;color:var(--color-text-tertiary);margin:0 0 6px">PLAY TRIGGERS</div>' +
+    '<span class="tag-play" style="background:' + s.play.bg + ';color:' + s.play.color + ';border:0.5px solid ' + s.play.border + '">' + s.play.label + '</span>' +
+    '<div style="font-size:13px;color:var(--color-text-secondary);margin:8px 0 0">' + s.play.detail + '</div>';
+  container.appendChild(playCard);
+
+  requestAnimationFrame(() => { requestAnimationFrame(() => {
+    container.querySelectorAll('.outcome-card').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 150);
+    });
+  }); });
+}
+
+showScenario('prospect');
+</script>
+</body>
+</html>
