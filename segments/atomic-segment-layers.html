@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atomic Segment Framework — Four Layers</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 24px; background: #fff; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+  .layer-row { opacity: 0.2; transform: translateY(4px); transition: opacity .5s, transform .5s; }
+  .layer-row.active { opacity: 1; transform: translateY(0); }
+  .layer-box { padding: 14px 16px; border-radius: 12px; border: 1px solid #e5e5e5; background: #fff; }
+  .layer-num { font-size: 11px; letter-spacing: 0.5px; color: #999; margin: 0 0 4px; }
+  .layer-title { font-size: 15px; font-weight: 500; margin: 0 0 2px; }
+  .layer-desc { font-size: 13px; color: #666; margin: 0 0 10px; }
+  .layer-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .conn-row { text-align: center; padding: 4px 0; opacity: 0.15; transition: opacity .4s; }
+  .conn-row.active { opacity: 1; }
+  .conn-label { font-size: 12px; color: #bbb; }
+  .pill-stage { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #F1EFE8; color: #444; border: 1px solid #D3D1C7; }
+  .pill-dim { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #FAECE7; color: #712B13; border: 1px solid #F0997B; }
+  .pill-atom { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #E1F5EE; color: #085041; border: 1px solid #5DCAA5; }
+  .pill-canon { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #EEEDFE; color: #3C3489; border: 1px solid #AFA9EC; }
+  .stage-flow { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .stage-arrow { font-size: 11px; color: #ccc; }
+  button { font-family: inherit; font-size: 13px; cursor: pointer; padding: 6px 16px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #666; transition: background .2s; }
+  button:hover { background: #f5f5f3; }
+  .running { background: #f5f5f3; color: #1a1a1a; }
+  .status { font-size: 13px; color: #999; margin-left: 8px; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:12px;margin:0 0 16px">
+  <button id="play-btn" onclick="playBuild()">Build layers</button>
+  <button onclick="resetAll()">Reset</button>
+  <span class="status" id="status-text"></span>
+</div>
+
+<div class="layer-row" id="layer-4">
+  <div class="layer-box" style="border-color:#AFA9EC">
+    <div class="layer-num">LAYER 4</div>
+    <div class="layer-title" style="color:#3C3489">Canonical segments</div>
+    <div class="layer-desc">Named combinations shared across teams and tools</div>
+    <div class="layer-pills">
+      <span class="pill-canon">Self-serve SMB SaaS lead</span>
+      <span class="pill-canon">At-risk mid-market active</span>
+    </div>
+    <div style="font-size:11px;color:#bbb;margin:8px 0 0">= state:lead + motion:self-serve + size:smb + industry:saas</div>
+  </div>
+</div>
+
+<div class="conn-row" id="conn-4"><span class="conn-label">composed from</span></div>
+
+<div class="layer-row" id="layer-3">
+  <div class="layer-box" style="border-color:#5DCAA5">
+    <div class="layer-num">LAYER 3</div>
+    <div class="layer-title" style="color:#085041">Atomic segments</div>
+    <div class="layer-desc">A single value on a single dimension — the smallest named pieces</div>
+    <div class="layer-pills">
+      <span class="pill-atom">motion:self-serve</span>
+      <span class="pill-atom">size:smb</span>
+      <span class="pill-atom">industry:saas</span>
+      <span class="pill-atom">geo:bay-area</span>
+      <span class="pill-atom">plan:team</span>
+      <span class="pill-atom">type:paid</span>
+    </div>
+  </div>
+</div>
+
+<div class="conn-row" id="conn-3"><span class="conn-label">values on</span></div>
+
+<div class="layer-row" id="layer-2">
+  <div class="layer-box" style="border-color:#F0997B">
+    <div class="layer-num">LAYER 2</div>
+    <div class="layer-title" style="color:#712B13">Dimensions</div>
+    <div class="layer-desc">Lenses for describing a company or person</div>
+    <div class="layer-pills">
+      <span class="pill-dim">GTM motion</span>
+      <span class="pill-dim">Company size</span>
+      <span class="pill-dim">Industry</span>
+      <span class="pill-dim">Geography</span>
+      <span class="pill-dim">Plan</span>
+      <span class="pill-dim">Customer type</span>
+    </div>
+  </div>
+</div>
+
+<div class="conn-row" id="conn-2"><span class="conn-label">scoped by</span></div>
+
+<div class="layer-row" id="layer-1">
+  <div class="layer-box" style="border-color:#D3D1C7">
+    <div class="layer-num">LAYER 1</div>
+    <div class="layer-title">Customer journey state</div>
+    <div class="layer-desc">Where a company is right now — mutually exclusive, exactly one at a time</div>
+    <div class="stage-flow">
+      <span class="pill-stage">Prospect</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Lead</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Engaged</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Opportunity</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Commit</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Onboarding</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Active</span><span class="stage-arrow">-></span>
+      <span class="pill-stage">Churned</span>
+    </div>
+  </div>
+</div>
+
+<script>
+var playing = false;
+
+var sequence = [
+  { el: 'layer-1', delay: 0 },
+  { el: 'conn-2', delay: 600 },
+  { el: 'layer-2', delay: 800 },
+  { el: 'conn-3', delay: 1400 },
+  { el: 'layer-3', delay: 1600 },
+  { el: 'conn-4', delay: 2200 },
+  { el: 'layer-4', delay: 2400 }
+];
+
+var labels = [
+  { delay: 0, text: 'Starting with where the customer is...' },
+  { delay: 800, text: 'Adding dimensions as lenses...' },
+  { delay: 1600, text: 'Each dimension gets specific values — atomic segments...' },
+  { delay: 2400, text: 'Compose them into canonical segments teams can act on.' }
+];
+
+function playBuild() {
+  if (playing) return;
+  resetAll();
+  playing = true;
+  var btn = document.getElementById('play-btn');
+  btn.classList.add('running');
+  btn.textContent = 'Building...';
+
+  sequence.forEach(function(s) {
+    setTimeout(function() {
+      if (!playing) return;
+      document.getElementById(s.el).classList.add('active');
+    }, s.delay);
+  });
+
+  labels.forEach(function(l) {
+    setTimeout(function() {
+      if (!playing) return;
+      document.getElementById('status-text').textContent = l.text;
+    }, l.delay);
+  });
+
+  setTimeout(function() {
+    playing = false;
+    btn.classList.remove('running');
+    btn.textContent = 'Build layers';
+    document.getElementById('status-text').textContent = '';
+  }, 3200);
+}
+
+function resetAll() {
+  playing = false;
+  document.getElementById('play-btn').classList.remove('running');
+  document.getElementById('play-btn').textContent = 'Build layers';
+  document.getElementById('status-text').textContent = '';
+  var els = document.querySelectorAll('.layer-row, .conn-row');
+  for (var i = 0; i < els.length; i++) {
+    els[i].classList.remove('active');
+  }
+}
+</script>
+</body>
+</html>
